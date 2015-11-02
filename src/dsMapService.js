@@ -1,15 +1,29 @@
 ! function(window, angular, undefined) {
   angular.module('ds.map', []).
   factory('dsMapFactory', ['$http', function($http) {
-    var obj = {
-
-    };
+    var defaultMapSettings = {
+        center: {
+          lat: 12.94206,
+          lng: 77.62229
+        },
+        zoom: 8
+      },
+      obj = {
+        getDefaultMapSettings: function() {
+          return defaultMapSettings;
+        },
+        setDefaultMapSettings: function(settingsObj) {
+          defaultMapSettings = settingsObj;
+        }
+      };
     return obj;
   }]).
   directive('dsMap', ['$q', '$timeout', 'dsMapFactory', function($q, $timeout, dsMapFactory) {
     var deferred = $q.defer(),
       obj = {
-        scope: true,
+        scope: {
+          dsMapSettings: "="
+        },
         restrict: "E",
         link: function(scope) {
 
@@ -18,7 +32,9 @@
           var _deferred = $q.defer(),
             dsMapElements = 0,
             deferredArray = [],
-            that = this;
+            that = this,
+            dsMapSettings = that.dsMapSettings = $scope.dsMapSettings || dsMapFactory.getDefaultMapSettings(),
+            map = new google.maps.Map(document.createElement('div'), dsMapSettings);
 
           this.mapDeferred = deferred;
           this.mapRendered = deferred.promise;
@@ -36,13 +52,15 @@
           };
 
           this.setMap = function(map) {
-            dsMapFactory.map = that.map = that.map || map;
+            dsMapFactory.map = that.map = map;
             this.setLocation(that.map.getCenter());
             dsMapFactory.marker = {
               position: that.map.getCenter(),
               map: that.map
             };
           };
+
+          that.setMap(map);
 
           (function(dfrd, _dfrd) {
             that.mapRendered.then(function() {
@@ -70,27 +88,16 @@
       template: "<div></div>",
       require: "^?dsMap",
       link: function(scope, element, attrs, dsMapController) {
-        if (scope.dsMapSettings) {
-          var map = new google.maps.Map(element[0], scope.dsMapSettings);
-          dsMapController.setMap(map);
-        } else {
-          var defaultMap = new google.maps.Map(document.createElement('div'), {
-            center: {
-              lat: 12.94206,
-              lng: 77.62229
-            },
-            zoom: 8
-          });
-          dsMapController.setMap(defaultMap);
-        }
+        var map = new google.maps.Map(element[0], scope.dsMapSettings || dsMapController.dsMapSettings);
+        dsMapController.setMap(map);
+        dsMapController.isViewSet = true;
       },
       controller: ['$scope', '$element', '$attrs', function($scope, $element, $attr) {
 
       }]
     };
     return obj;
-  }).
-  directive('dsMapPlaces', ['$q', function($q) {
+  }).directive('dsMapPlaces', ['$q', function($q) {
     var initialdsMapView = true,
       deferred = $q.defer(),
       obj = {
@@ -106,6 +113,7 @@
             dsMapController.mapDeferred.resolve();
             initialdsMapView = false;
           }
+
           dsMapController.mapRendered.then(function() {
             dsMapController.placesService = new google.maps.places.PlacesService(dsMapController.getMap());
             dsMapController.directionsService = new google.maps.DirectionsService();
@@ -122,8 +130,7 @@
         }]
       };
     return obj;
-  }]).
-  directive('dsPlacesType', ['$q', '$timeout', function($q, $timeout) {
+  }]).directive('dsPlacesType', ['$q', '$timeout', function($q, $timeout) {
     var deferred = $q.defer(),
       placesServiceCount = 0,
       obj = {
@@ -187,8 +194,8 @@
             throw "'types' attribute must be an array or object"
           }
 
-          (function() {
-            scope.onMouseOver = function() {
+          if (dsMapController.isViewSet) {
+            scope.showDirection = function() {
               var request = {
                   origin: dsMapController.getLocation(),
                   destination: this.place.geometry.location,
@@ -209,7 +216,7 @@
                 });
               } catch (err) {}
             };
-          })();
+          }
         },
         controller: ['$scope', '$element', '$attrs', function($scope, $element, $attr) {
           $scope.Places = [];
@@ -219,8 +226,7 @@
     deferred.resolve();
 
     return obj;
-  }]).
-  directive('dsWithinBounds', [function() {
+  }]).directive('dsWithinBounds', [function() {
     var obj = {
       require: ["^?dsMap", "^?dsMapPlaces", "^?dsPlacesType"],
       link: function(scope, element, attrs, dsMapControllers) {
