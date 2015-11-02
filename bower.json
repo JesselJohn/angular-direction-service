@@ -1,0 +1,21 @@
+{
+  "name": "angular-direction-service",
+  "version": "0.0.1",
+  "dependencies": {
+    "angular": "^1.3.0"
+  },
+  "homepage": "https://github.com/JesselJohn/angular-direction-service",
+  "authors": [
+    "Jessel John <jesseljohn@130.com>"
+  ],
+  "description": "Control view with routes and providing extra functionalities for easy route management",
+  "main": "src/dsMapService.js",
+  "keywords": [
+    "angular",
+    "google maps",
+    "nearby places",
+    "direction service"
+  ],
+  "license": "MIT",
+  "ignore":[]
+}
