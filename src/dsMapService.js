@@ -30,6 +30,7 @@
         },
         controller: ['$scope', '$element', '$attrs', function($scope, $element, $attr) {
           var _deferred = $q.defer(),
+            placesDeferred = $q.defer(),
             dsMapElements = 0,
             deferredArray = [],
             that = this,
@@ -38,6 +39,8 @@
 
           that.mapDeferred = deferred;
           that.mapRendered = deferred.promise;
+          that.placesDeferred = placesDeferred;
+          that.placesRendered = placesDeferred.promise;
 
           that.placesCount = 0;
 
@@ -63,6 +66,11 @@
           };
 
           that.setMap(map);
+
+          that.placesRendered.then(function(){
+            that.getMap().fitBounds(that.bounds);
+            that.getMap().setCenter(that.getLocation());
+          });
 
           (function(dfrd, _dfrd) {
             that.mapRendered.then(function() {
@@ -167,6 +175,7 @@
                         dsMapController.nextDefer.promise.then(function(){
                           _dfrd.resolve();
                         });
+                        dsMapController.placesDeferred.resolve();
                       }else{
                         _dfrd.resolve();
                       }
@@ -242,8 +251,6 @@
 
         if (scope.place) {
           dsMapController.bounds.extend(scope.place.geometry.location);
-          dsMapController.getMap().fitBounds(dsMapController.bounds);
-          dsMapController.getMap().setCenter(dsMapController.getLocation());
         }
       }
     };
