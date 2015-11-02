@@ -37,24 +37,15 @@
 
           this.setMap = function(map) {
             dsMapFactory.map = that.map = that.map || map;
-            this.setLocation(that.getMap().getCenter());
+            this.setLocation(that.map.getCenter());
             dsMapFactory.marker = {
-              position: that.getMap().getCenter(),
-              map: that.getMap()
+              position: that.map.getCenter(),
+              map: that.map
             };
           };
 
           (function(dfrd, _dfrd) {
             that.mapRendered.then(function() {
-              var defaultMap = new google.maps.Map(document.createElement('div'), {
-                center: {
-                  lat: 12.94206,
-                  lng: 77.62229
-                },
-                zoom: 8
-              });
-              that.setMap(defaultMap);
-
               var marker = new google.maps.Marker(dsMapFactory.marker);
               marker.setMap(that.getMap());
 
@@ -79,8 +70,19 @@
       template: "<div></div>",
       require: "^?dsMap",
       link: function(scope, element, attrs, dsMapController) {
-        var map = new google.maps.Map(element[0], scope.dsMapSettings);
-        dsMapController.setMap(map);
+        if (scope.dsMapSettings) {
+          var map = new google.maps.Map(element[0], scope.dsMapSettings);
+          dsMapController.setMap(map);
+        } else {
+          var defaultMap = new google.maps.Map(document.createElement('div'), {
+            center: {
+              lat: 12.94206,
+              lng: 77.62229
+            },
+            zoom: 8
+          });
+          dsMapController.setMap(defaultMap);
+        }
       },
       controller: ['$scope', '$element', '$attrs', function($scope, $element, $attr) {
 
