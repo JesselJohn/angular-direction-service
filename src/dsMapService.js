@@ -150,7 +150,9 @@
                     obj.types = [type];
                   }
                   placesService.nearbySearch(obj, function(results, status) {
-                    scope.Places = scope.Places.concat(type === undefined ? results : results.slice(0, scope.types[type]));
+                    if (Object.prototype.toString.call(results) == "[object Array]") {
+                      scope.Places = scope.Places.concat(type === undefined ? results : results.slice(0, scope.types[type]));
+                    }
                     $timeout(function() {
                       _dfrd.resolve();
                     }, 300);
