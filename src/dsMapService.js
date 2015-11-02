@@ -36,24 +36,26 @@
             dsMapSettings = that.dsMapSettings = $scope.dsMapSettings || dsMapFactory.getDefaultMapSettings(),
             map = new google.maps.Map(document.createElement('div'), dsMapSettings);
 
-          this.mapDeferred = deferred;
-          this.mapRendered = deferred.promise;
+          that.mapDeferred = deferred;
+          that.mapRendered = deferred.promise;
 
-          this.getLocation = function() {
+          that.placesCount = 0;
+
+          that.getLocation = function() {
             return that.dsPlacesLocation;
           };
 
-          this.setLocation = function(center) {
+          that.setLocation = function(center) {
             that.dsPlacesLocation = center || that.getMap().getCenter();
           };
 
-          this.getMap = function() {
+          that.getMap = function() {
             return that.map;
           };
 
-          this.setMap = function(map) {
+          that.setMap = function(map) {
             dsMapFactory.map = that.map = map;
-            this.setLocation(that.map.getCenter());
+            that.setLocation(that.map.getCenter());
             dsMapFactory.marker = {
               position: that.map.getCenter(),
               map: that.map
@@ -66,14 +68,10 @@
             that.mapRendered.then(function() {
               var marker = new google.maps.Marker(dsMapFactory.marker);
               marker.setMap(that.getMap());
-
-              $timeout(function() {
-                _dfrd.resolve();
-              }, 5000);
             });
           })(deferred, _deferred);
 
-          deferred = _deferred;
+          that.nextDefer = deferred = _deferred;
         }]
       };
     return obj;
@@ -152,6 +150,7 @@
             };
 
           function callPlacesService(dfrd, _dfrd, type) {
+            dsMapController.placesCount++;
             dsMapController.mapRendered.then(function() {
               dfrd.promise.then(function() {
                 dsMapPlacesController.placesServiceSet.then(function(placesService) {
@@ -163,7 +162,14 @@
                       scope.Places = scope.Places.concat(type === undefined ? results : results.slice(0, scope.types[type]));
                     }
                     $timeout(function() {
-                      _dfrd.resolve();
+                      if((--dsMapController.placesCount)===0){
+                        dsMapController.nextDefer.resolve();
+                        dsMapController.nextDefer.promise.then(function(){
+                          _dfrd.resolve();
+                        });
+                      }else{
+                        _dfrd.resolve();
+                      }
                     }, 300);
                   });
                 });
@@ -196,12 +202,12 @@
 
           if (dsMapController.isViewSet) {
             scope.showDirection = function() {
-              var request = {
+              var that = this,
+                request = {
                   origin: dsMapController.getLocation(),
-                  destination: this.place.geometry.location,
+                  destination: that.place.geometry.location,
                   travelMode: google.maps.TravelMode["DRIVING"]
-                },
-                that = this;
+                };
 
               try {
                 if (that.isDirectionResponseCallMade) {
