@@ -8,7 +8,7 @@
   "authors": [
     "Jessel John <jesseljohn130@gmail.com>"
   ],
-  "description": "Control view with routes and providing extra functionalities for easy route management",
+  "description": "Google Maps direction service for nearby places from a location",
   "main": "src/dsMapService.js",
   "keywords": [
     "angular",
