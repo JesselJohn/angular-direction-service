@@ -1,2 +1,2 @@
 # angular-direction-service
-Direction service for nearby places from a location
+Google Maps direction service for nearby places from a location
