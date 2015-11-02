@@ -6,7 +6,7 @@
   },
   "homepage": "https://github.com/JesselJohn/angular-direction-service",
   "authors": [
-    "Jessel John <jesseljohn@130.com>"
+    "Jessel John <jesseljohn130@gmail.com>"
   ],
   "description": "Control view with routes and providing extra functionalities for easy route management",
   "main": "src/dsMapService.js",
