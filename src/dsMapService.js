@@ -34,9 +34,7 @@
       setDefaultMapSettings: function(settingsObj) {
         defaultMapSettings = settingsObj;
       },
-      setDirectionsToLocation: function() {
-
-      }
+      setDirectionsToLocation: function() {}
     };
     return obj;
   }]).
@@ -426,10 +424,16 @@
 
           if (scope.place) {
             var placeLocation = scope.place.geometry.location,
-              setVisibility = scope.options === undefined ? true : !!scope.options.visible;
+              setVisibility = scope.options === undefined ? true : !!scope.options.visible,
+              distanceThis = parseFloat(google.maps.geometry.spherical.computeDistanceBetween(dsMapController.getLocation(), placeLocation) / 1000).toFixed(1),
+              durationThis = parseInt(distanceThis * 42 / 3.5, 10);
             if (setVisibility) {
               dsMapController.bounds.extend(placeLocation);
             }
+
+            scope.place.distance = distanceThis;
+            scope.place.duration = durationThis;
+
             dsMapController.mapRendered.then(function() {
               var marker = setMarkerFunc({
                 position: placeLocation,
