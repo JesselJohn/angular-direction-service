@@ -357,7 +357,7 @@
                         } else {
                           _dfrd.resolve();
                         }
-                      }, 300);
+                      }, (dsMapController.placesCount % 10 !== 0 ? 0 : 1000));
                     });
                   });
                 });
@@ -451,6 +451,15 @@
               setVisibility = scope.options === undefined ? true : !!scope.options.visible,
               distanceThis = parseFloat(google.maps.geometry.spherical.computeDistanceBetween(dsMapController.getLocation(), placeLocation) / 1000).toFixed(1),
               durationThis = parseInt(distanceThis * 42 / 3.5, 10);
+
+            if (scope.options === undefined) {
+              scope.options = {
+                visible: true
+              };
+            } else if (Object.prototype.toString.call(scope.options) == "[object Object]") {
+              scope.options.visible = !!scope.options.visible;
+            }
+
             if (setVisibility) {
               dsMapController.bounds.extend(placeLocation);
             }
