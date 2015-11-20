@@ -357,7 +357,7 @@
                         } else {
                           _dfrd.resolve();
                         }
-                      }, (dsMapController.placesCount % 10 !== 0 ? 0 : 1000));
+                      }, 300);
                     });
                   });
                 });
