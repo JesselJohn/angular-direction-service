@@ -190,8 +190,7 @@
       };
       return obj;
     }).directive('dsMapPlaces', ['$q', 'dsMapFactory', function($q, dsMapFactory) {
-      var that = undefined,
-        initialdsMapView = true,
+      var initialdsMapView = true,
         deferred = $q.defer(),
         obj = {
           scope: {
@@ -218,7 +217,7 @@
             });
           },
           controller: ['$scope', '$element', '$attrs', function($scope, $element, $attr) {
-            that = this;
+            var that = this;
 
             function dsMapPlacesDeferredFunc() {
               var _deferred = $q.defer();
