@@ -375,9 +375,7 @@
                         } else {
                           _dfrd.resolve();
                         }
-
-                        // @TODO : Increases performance drastically but fails for more than one map
-                      }, (dsMapController.placesCount % 10 !== 0 ? 0 : 1000));
+                      }, 300);
                     });
                   });
                 });
