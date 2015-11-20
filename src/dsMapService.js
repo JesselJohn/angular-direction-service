@@ -47,7 +47,7 @@
     var deferred = $q.defer(),
       obj = {
         scope: {
-          dsMapSettings: "="
+          mapSettings: "="
         },
         restrict: "E",
         link: function(scope) {
@@ -59,8 +59,8 @@
             dsMapElements = 0,
             deferredArray = [],
             that = this,
-            dsMapSettings = that.dsMapSettings = $scope.dsMapSettings || dsMapFactory.getDefaultMapSettings(),
-            map = new google.maps.Map(document.createElement('div'), dsMapSettings);
+            mapSettings = that.mapSettings = $scope.mapSettings || dsMapFactory.getDefaultMapSettings(),
+            map = new google.maps.Map(document.createElement('div'), mapSettings);
 
           function getLocationFunc() {
             return that.dsPlacesLocation;
@@ -77,9 +77,6 @@
           function setMapFunc(map) {
             dsMapFactory.map = that.map = map;
             that.setLocation(that.map.getCenter());
-            dsMapFactory.marker = {
-              position: that.map.getCenter()
-            };
           }
 
           function iterateAllMarkersFunc(callback) {
@@ -164,7 +161,6 @@
           (function(dfrd, _dfrd) {
             that.mapRendered.then(function() {
               dsMapFactory.setMarker = setMarkerFunc = setMarkerCurryFunc(that.getMap());
-              setMarkerFunc(new google.maps.Marker(dsMapFactory.marker));
             });
           })(deferred, _deferred);
 
@@ -176,17 +172,30 @@
   directive('dsMapView', function() {
       var obj = {
         scope: {
-          dsMapSettings: "="
+          mapSettings: "=",
+          originOptions: "=",
+          destinationOptions: "="
         },
         restrict: "E",
         replace: true,
         template: "<div></div>",
         require: "^?dsMap",
         link: function(scope, element, attrs, dsMapController) {
-          var map = new google.maps.Map(element[0], scope.dsMapSettings || dsMapController.dsMapSettings);
+          var map = new google.maps.Map(element[0], scope.mapSettings || dsMapController.mapSettings),
+            clonedOriginMarkerObject = angular.copy(scope.originOptions || {});
           dsMapController.setMap(map);
           dsMapController.isViewSet = true;
-        }
+          dsMapController.destinationOptions = angular.copy(scope.destinationOptions || {});
+          dsMapController.mapRendered.then(function() {
+            clonedOriginMarkerObject.position = dsMapController.getLocation();
+            setMarkerFunc(clonedOriginMarkerObject);
+          });
+        },
+        controller: ['$scope', function($scope) {
+          var that = this;
+          that.originOptions = $scope.originOptions;
+          that.destinationOptions = angular.copy($scope.destinationOptions);
+        }]
       };
       return obj;
     }).directive('dsMapPlaces', ['$q', 'dsMapFactory', function($q, dsMapFactory) {
@@ -277,20 +286,19 @@
                 travelMode: google.maps.TravelMode[mode]
               };
 
+              dsMapController.destinationOptions.position = location;
+
               dsMapPlacesController.dsMapPlacesLoaded(function() {
                 dsMapController.hideAllVisibleMarkers();
                 dsMapController.directionsDisplay.setMap(dsMapController.getMap());
                 dsMapController.directionsService.route(request, function(response, status) {
                   if (status == "OK") {
+                    var destinationMarker = setMarkerFunc(dsMapController.destinationOptions);
                     dsMapController.directionsDisplay.setDirections(response);
                     dsMapController.bounds = new google.maps.LatLngBounds();
                     dsMapController.bounds.extend(dsMapController.getLocation());
                     dsMapController.bounds.extend(location);
-                    dsMapController.placesGroupHash['searchedLocation'] = [location];
-                    setMarkerFunc({
-                      position: location,
-                      visible: true
-                    });
+                    dsMapController.placesGroupHash['searchedLocation'] = [destinationMarker];
                     dsMapController.changeMapBounds();
                   }
                 });
@@ -362,7 +370,9 @@
                         } else {
                           _dfrd.resolve();
                         }
-                      }, 300);
+
+                        // @TODO : Increases performance drastically but fails for more than one map
+                      }, (dsMapController.placesCount % 10 !== 0 ? 0 : 1000));
                     });
                   });
                 });
@@ -453,19 +463,21 @@
 
           if (scope.place) {
             var placeLocation = scope.place.geometry.location,
-              setVisibility = scope.options === undefined ? true : !!scope.options.visible,
+              clonedOptions = angular.copy(scope.options),
               distanceThis = parseFloat(google.maps.geometry.spherical.computeDistanceBetween(dsMapController.getLocation(), placeLocation) / 1000).toFixed(1),
               durationThis = parseInt(distanceThis * 42 / 3.5, 10);
 
-            if (scope.options === undefined) {
-              scope.options = {
+            if (clonedOptions === undefined) {
+              clonedOptions = {
+                position: placeLocation,
                 visible: true
               };
-            } else if (Object.prototype.toString.call(scope.options) == "[object Object]") {
-              scope.options.visible = !!scope.options.visible;
+            } else if (Object.prototype.toString.call(clonedOptions) == "[object Object]") {
+              clonedOptions.position = placeLocation;
+              clonedOptions.visible = clonedOptions.visible === undefined ? true : clonedOptions.visible;
             }
 
-            if (setVisibility) {
+            if (clonedOptions.visible) {
               dsMapController.bounds.extend(placeLocation);
             }
 
@@ -473,10 +485,7 @@
             scope.place.duration = durationThis;
 
             dsMapController.mapRendered.then(function() {
-              var marker = setMarkerFunc({
-                position: placeLocation,
-                visible: setVisibility
-              });
+              var marker = setMarkerFunc(clonedOptions);
               try {
                 dsMapController.placesGroupHash[scope.group].push(marker);
               } catch (err) {
