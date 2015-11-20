@@ -190,7 +190,8 @@
       };
       return obj;
     }).directive('dsMapPlaces', ['$q', 'dsMapFactory', function($q, dsMapFactory) {
-      var initialdsMapView = true,
+      var that = undefined,
+        initialdsMapView = true,
         deferred = $q.defer(),
         obj = {
           scope: {
@@ -201,31 +202,6 @@
           require: "^?dsMap",
           link: function(scope, element, attrs, dsMapController) {
             var rankByDistance = google.maps.places.RankBy.DISTANCE;
-
-            function setDirectionsToLocationFunc(location, mode) {
-              var request = {
-                origin: dsMapController.getLocation(),
-                destination: location,
-                travelMode: google.maps.TravelMode[mode]
-              };
-
-              dsMapController.hideAllVisibleMarkers();
-              dsMapController.directionsDisplay.setMap(dsMapController.getMap());
-              dsMapController.directionsService.route(request, function(response, status) {
-                if (status == "OK") {
-                  dsMapController.directionsDisplay.setDirections(response);
-                  dsMapController.bounds = new google.maps.LatLngBounds();
-                  dsMapController.bounds.extend(dsMapController.getLocation());
-                  dsMapController.bounds.extend(location);
-                  dsMapController.placesGroupHash['searchedLocation'] = [location];
-                  setMarkerFunc({
-                    position: location,
-                    visible: true
-                  });
-                  dsMapController.changeMapBounds();
-                }
-              });
-            }
 
             if (initialdsMapView) {
               dsMapController.mapDeferred.resolve();
@@ -240,15 +216,9 @@
               dsMapController.bounds = new google.maps.LatLngBounds();
               deferred.resolve(dsMapController.placesService);
             });
-
-            dsMapFactory.dsMapPlacesLoaded(function() {
-              if (dsMapController.isViewSet) {
-                dsMapFactory.setDirectionsToLocation = setDirectionsToLocationFunc;
-              }
-            });
           },
           controller: ['$scope', '$element', '$attrs', function($scope, $element, $attr) {
-            var that = this;
+            that = this;
 
             function dsMapPlacesDeferredFunc() {
               var _deferred = $q.defer();
@@ -268,14 +238,17 @@
         };
       return obj;
     }])
-    .directive('dsHasGroup', [function() {
-      var previousGroup = undefined,
-        obj = {
-          require: ["^?dsMap", "^?dsMapPlaces"],
-          link: function(scope, element, attrs, dsMapControllers) {
-            var dsMapController = dsMapControllers[0],
-              dsMapPlacesController = dsMapControllers[1];
+    .directive('dsGroup', ['dsMapFactory', function(dsMapFactory) {
+      var obj = {
+        scope: true,
+        restrict: "E",
+        require: ["^?dsMap", "^?dsMapPlaces"],
+        link: function(scope, element, attrs, dsMapControllers) {
+          previousGroup = undefined;
+          dsMapController = dsMapControllers[0];
+          dsMapPlacesController = dsMapControllers[1];
 
+          (function(previousGroup, dsMapController, dsMapPlacesController) {
             function onToggleClickFunc(group) {
               dsMapController.directionsDisplay.setMap(null);
               if (previousGroup !== undefined) {
@@ -298,13 +271,46 @@
               });
             }
 
-            dsMapController.toggleGroupVisibility = scope.toggleGroupVisibility = toggleGroupVisibilityFunc;
-          },
-          controller: ['$scope', function($scope) {
-            var that = this;
-            that.isGroupSet = true;
-          }]
-        };
+            function setDirectionsToLocationFunc(location, mode) {
+              var request = {
+                origin: dsMapController.getLocation(),
+                destination: location,
+                travelMode: google.maps.TravelMode[mode]
+              };
+
+              dsMapPlacesController.dsMapPlacesLoaded(function() {
+                dsMapController.hideAllVisibleMarkers();
+                dsMapController.directionsDisplay.setMap(dsMapController.getMap());
+                dsMapController.directionsService.route(request, function(response, status) {
+                  if (status == "OK") {
+                    dsMapController.directionsDisplay.setDirections(response);
+                    dsMapController.bounds = new google.maps.LatLngBounds();
+                    dsMapController.bounds.extend(dsMapController.getLocation());
+                    dsMapController.bounds.extend(location);
+                    dsMapController.placesGroupHash['searchedLocation'] = [location];
+                    setMarkerFunc({
+                      position: location,
+                      visible: true
+                    });
+                    dsMapController.changeMapBounds();
+                  }
+                });
+              });
+            }
+
+            scope.toggleGroupVisibility = toggleGroupVisibilityFunc;
+
+            if (dsMapController.isViewSet) {
+              dsMapFactory.setDirectionsToLocation = setDirectionsToLocationFunc;
+            }
+          })(previousGroup, dsMapController, dsMapPlacesController);
+        },
+        controller: ['$scope', function($scope) {
+          var that = undefined;
+          that = this;
+          that.isGroupSet = true;
+        }]
+      };
 
       return obj;
     }])
@@ -322,11 +328,11 @@
           templateUrl: "dsMapPlaces.html",
           restrict: "E",
           replace: true,
-          require: ["^?dsMap", "^?dsMapPlaces", "^?dsHasGroup"],
+          require: ["^?dsMap", "^?dsMapPlaces", "^?dsGroup"],
           link: function(scope, element, attrs, dsMapControllers) {
             var dsMapController = dsMapControllers[0],
               dsMapPlacesController = dsMapControllers[1],
-              dsHasGroupController = dsMapControllers[2],
+              dsGroupController = dsMapControllers[2],
               obj = {
                 location: dsMapController.getMap().getCenter(),
                 types: []
@@ -374,7 +380,7 @@
                   travelMode: google.maps.TravelMode["DRIVING"]
                 };
 
-                if (dsHasGroupController && dsMapController.placesGroupHash[scope.group][0].visible === false) {
+                if (dsGroupController && dsMapController.placesGroupHash[scope.group][0].visible === false) {
                   dsMapController.setGroupMarkerVisibility(scope.group, true, true);
                 }
 
