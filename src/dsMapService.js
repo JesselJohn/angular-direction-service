@@ -257,6 +257,8 @@
           dsMapPlacesController = dsMapControllers[1];
 
           (function(previousGroup, dsMapController, dsMapPlacesController) {
+            var isMapPlacesLoaded = false;
+
             function onToggleClickFunc(group) {
               dsMapController.directionsDisplay.setMap(null);
               if (previousGroup !== undefined) {
@@ -275,8 +277,11 @@
 
             function toggleGroupVisibilityFunc(group) {
               dsMapPlacesController.dsMapPlacesLoaded(function() {
-                onToggleClickFunc(group);
+                isMapPlacesLoaded = true;
               });
+              if (isMapPlacesLoaded) {
+                onToggleClickFunc(group);
+              }
             }
 
             function setDirectionsToLocationFunc(location, mode) {
