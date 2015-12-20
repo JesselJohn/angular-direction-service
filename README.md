@@ -48,15 +48,15 @@ Of the above metioned directives three directives dsMapView, dsMapPlaces and dsP
 
 Also you need to provide a template which is needed to render each place with id as *"dsMapPlaces.html"*. Example template :
 
-  <script type="text/ng-template" id="dsMapPlaces.html">
-    <div>
-      <div class="commute__item" ng-repeat="place in Places | limitTo:5" ng-mouseover="showDirection()" ds-each-place>
-        <label ng-bind="place.name"></label>
-        <span ng-bind="place.distance + ' km'"></span>
-        <div><i class="car-icon-grey"></i><span ng-bind="place.duration+ ' min'"></span></div>
+    <script type="text/ng-template" id="dsMapPlaces.html">
+      <div>
+        <div class="commute__item" ng-repeat="place in Places | limitTo:5" ng-mouseover="showDirection()" ds-each-place>
+          <label ng-bind="place.name"></label>
+          <span ng-bind="place.distance + ' km'"></span>
+          <div><i class="car-icon-grey"></i><span ng-bind="place.duration+ ' min'"></span></div>
+        </div>
       </div>
-    </div>
-  </script>
+    </script>
 
 ## Working example
 
