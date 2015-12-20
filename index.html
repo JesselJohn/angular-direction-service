@@ -1,0 +1,173 @@
+<!doctype html>
+<!-- The Time Machine GitHub pages theme was designed and developed by Jon Rohan, on Feb 7, 2012. -->
+<!-- Follow him for fun. http://twitter.com/jonrohan. Tail his code on https://github.com/jonrohan -->
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+  <link rel="stylesheet" href="stylesheets/stylesheet.css" media="screen">
+  <link rel="stylesheet" href="stylesheets/github-dark.css">
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+  <script type="text/javascript" src="javascripts/script.js"></script>
+
+  <title>Angular Direction Service</title>
+  <meta name="description" content="Direction service for nearby places from a location">
+
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+
+</head>
+
+<body>
+
+  <div class="wrapper">
+    <header>
+      <h1 class="title">Angular Direction Service</h1>
+    </header>
+    <div id="container">
+      <p class="tagline">Direction service for nearby places from a location</p>
+      <div id="main" role="main">
+        <div class="download-bar">
+        <div class="inner">
+          <a href="https://github.com/JesselJohn/angular-direction-service/tarball/master" class="download-button tar"><span>Download</span></a>
+          <a href="https://github.com/JesselJohn/angular-direction-service/zipball/master" class="download-button zip"><span>Download</span></a>
+          <a href="https://github.com/JesselJohn/angular-direction-service" class="code">View Angular Direction Service on GitHub</a>
+        </div>
+        <span class="blc"></span><span class="trc"></span>
+        </div>
+        <article class="markdown-body">
+          <h1>
+<a id="angular-direction-service" class="anchor" href="#angular-direction-service" aria-hidden="true"><span class="octicon octicon-link"></span></a>Angular Direction Service</h1>
+
+<p>Google Maps direction service for nearby places from a location</p>
+
+<h2>
+<a id="introduction" class="anchor" href="#introduction" aria-hidden="true"><span class="octicon octicon-link"></span></a>Introduction</h2>
+
+<p>Google maps provides services using which one can know what are the nearby places and some other information like distance and time to travel to those nearby places from a particular location and these API's are used in many websites .But to create an entire view and functionality one needs to write code for the same .Since this functionality is increasingly used writing code for this functionality would be like spending time on something which was already developed but not availabe .</p>
+
+<p>Angular Direction Service provides ability to add the Nearby functionality just by adding HTML snippet and very less Javascript.</p>
+
+<h2>
+<a id="installation" class="anchor" href="#installation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Installation</h2>
+
+<p>Using bower :</p>
+
+<pre><code>#install package and add it to bower.json dependencies
+$ bower install angular-direction-service --save
+
+
+# install package and add it to bower.json devDependencies
+$ bower install angular-direction-service --save-dev
+</code></pre>
+
+<h2>
+<a id="direction-service-elements" class="anchor" href="#direction-service-elements" aria-hidden="true"><span class="octicon octicon-link"></span></a>Direction Service Elements</h2>
+
+<p>List of directives provided by dsmapservice</p>
+
+<ol>
+<li>
+<strong>dsMap</strong> (<em>required</em>) : Parent directive which controls all the child(below 2-5) directives.</li>
+<li>
+<strong>dsMapView</strong> (<em>optional</em> - Only if map is to be shown) : Directive to show map on page which will be linked to places directives(below 3-4).</li>
+<li>
+<strong>dsMapPlaces</strong> (<em>required</em>) : Parent directive which controls all places.</li>
+<li>
+<strong>dsGroup</strong> (<em>requred</em>) : Directive to handle functionalites for groups.</li>
+<li>
+<strong>dsPlacesType</strong> (<em>required</em>) : Directive which shows nearby places based on type/types passed to it.</li>
+</ol>
+
+<p>Of the above metioned directives three directives dsMapView, dsMapPlaces and dsPlacesType also have attributes which is available to customize the map:</p>
+
+<h5>
+<a id="dsmapview-" class="anchor" href="#dsmapview-" aria-hidden="true"><span class="octicon octicon-link"></span></a>dsMapView :</h5>
+
+<ol>
+<li>map-settings : Configurations for map</li>
+<li>origin-options : Configure origin marker</li>
+<li>destination-options : Configure destination marker</li>
+</ol>
+
+<h5>
+<a id="dsmapplaces-" class="anchor" href="#dsmapplaces-" aria-hidden="true"><span class="octicon octicon-link"></span></a>dsMapPlaces :</h5>
+
+<ol>
+<li>options : Configure properties like 'preserveViewport', 'suppressMarkers'...</li>
+</ol>
+
+<h5>
+<a id="dsplacestype-" class="anchor" href="#dsplacestype-" aria-hidden="true"><span class="octicon octicon-link"></span></a>dsPlacesType :</h5>
+
+<ol>
+<li>group : Specify within which group the marker of the types specified are in</li>
+<li>types : Specify type(Array)/types(Object)</li>
+<li>options : Configure nearby places marker</li>
+</ol>
+
+<p>Also you need to provide a template which is needed to render each place with id as <em>"dsMapPlaces.html"</em>. Example template :</p>
+
+<pre><code>&lt;script type="text/ng-template" id="dsMapPlaces.html"&gt;
+  &lt;div&gt;
+    &lt;div class="commute__item" ng-repeat="place in Places | limitTo:5" ng-mouseover="showDirection()" ds-each-place&gt;
+      &lt;label ng-bind="place.name"&gt;&lt;/label&gt;
+      &lt;span ng-bind="place.distance + ' km'"&gt;&lt;/span&gt;
+      &lt;div&gt;&lt;i class="car-icon-grey"&gt;&lt;/i&gt;&lt;span ng-bind="place.duration+ ' min'"&gt;&lt;/span&gt;&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/script&gt;
+</code></pre>
+
+<h2>
+<a id="working-example" class="anchor" href="#working-example" aria-hidden="true"><span class="octicon octicon-link"></span></a>Working example</h2>
+
+<p><a href="https://jsfiddle.net/Zword/1gLhjcg6/">https://jsfiddle.net/Zword/1gLhjcg6/</a></p>
+
+<h2>
+<a id="licence" class="anchor" href="#licence" aria-hidden="true"><span class="octicon octicon-link"></span></a>Licence</h2>
+
+<p>The MIT License (MIT)</p>
+
+<p>Copyright (c) 2015 Zword</p>
+
+<p>Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:</p>
+
+<p>The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.</p>
+
+<p>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.</p>
+        </article>
+      </div>
+    </div>
+    <footer>
+      <div class="owner">
+      <p><a href="https://github.com/JesselJohn" class="avatar"><img src="https://avatars2.githubusercontent.com/u/4385213?v=3&amp;s=60" width="48" height="48"></a> <a href="https://github.com/JesselJohn">JesselJohn</a> maintains <a href="https://github.com/JesselJohn/angular-direction-service">Angular Direction Service</a></p>
+
+
+      </div>
+      <div class="creds">
+        <small>This page generated using <a href="https://pages.github.com/">GitHub Pages</a><br>theme by <a href="https://twitter.com/jonrohan/">Jon Rohan</a></small>
+      </div>
+    </footer>
+  </div>
+  <div class="current-section">
+    <a href="#top">Scroll to top</a>
+    <a href="https://github.com/JesselJohn/angular-direction-service/tarball/master" class="tar">tar</a><a href="https://github.com/JesselJohn/angular-direction-service/zipball/master" class="zip">zip</a><a href="" class="code">source code</a>
+    <p class="name"></p>
+  </div>
+
+  
+</body>
+</html>
