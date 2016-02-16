@@ -13,10 +13,6 @@ Using bower :
 
     #install package and add it to bower.json dependencies
     $ bower install angular-direction-service --save
-
-
-    # install package and add it to bower.json devDependencies
-    $ bower install angular-direction-service --save-dev
     
 ## Direction Service Elements
 
