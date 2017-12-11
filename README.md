@@ -1,3 +1,5 @@
+## This Project is nolonger maintained
+
 # Angular Direction Service
 Google Maps direction service for nearby places from a location
 
